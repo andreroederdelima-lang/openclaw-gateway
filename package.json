@@ -1,0 +1,16 @@
+{
+  "name": "openclaw-gateway",
+  "version": "0.1.0",
+  "description": "HTTP gateway exposing OpenClaw skills as multi-tenant API for Ordem Plena Medical",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2"
+  }
+}
