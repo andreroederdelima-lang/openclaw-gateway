@@ -1,4 +1,44 @@
-node_modules
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Produção
+dist/
+build/
+.next/
+out/
+
+# Env
 .env
-npm-debug.log
+.env.local
+.env.*.local
+
+# Logs
 *.log
+npm-debug.log*
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Testes
+coverage/
+.nyc_output/
+
+# Temporários
+*.tmp
+*.temp
+.cache/
+
+# Dados sensíveis
+backups/
+dumps/
+*.sql
+*.sqlite
