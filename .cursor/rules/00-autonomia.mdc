@@ -45,3 +45,8 @@ Relate: rota, o que aparece na tela e o caminho do screenshot. Código que compi
 
 ## 8. Produção
 No Mac (worker mac-andre) você tem SSH e opera a VPS: backup antes de qualquer migração ou deploy, sempre. Na nuvem você não tem acesso à VPS: registre a pendência e siga.
+
+## 9. Como pedir decisão ao André
+Pergunta não é parada. Continue executando tudo o que não depende dele enquanto a pergunta fica aberta.
+Quando um item depender dele, faça a pergunta no chat com no máximo 3 opções numeradas, sua recomendação e o risco em uma linha, e siga para o próximo item executável sem esperar a resposta. Ele responde só com o número, quando puder. Ao receber a resposta, execute e continue.
+Mantenha no máximo 3 perguntas abertas por vez; as demais ficam na fila de pendências. Não mande relatório para ele ler: relatório longo vai para arquivo, no chat entra só a pergunta.
