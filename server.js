@@ -1,16 +1,21 @@
 import { createApp } from "./src/app.js";
+import { avisosDeAmbiente, erroDeProducao, hostDeEscuta, porta } from "./src/env.js";
+
+const bloqueio = erroDeProducao(process.env);
+if (bloqueio) {
+  console.error(`[gateway] ${bloqueio}`);
+  process.exit(1);
+}
+
+for (const aviso of avisosDeAmbiente(process.env)) {
+  console.error(`[gateway] ${aviso}`);
+}
 
 const app = createApp({ env: process.env });
 const port = porta(process.env.PORT);
-
-function porta(value) {
-  if (value === undefined || value === "") return 3463;
-  const number = Number(value);
-  if (!Number.isInteger(number) || number < 0 || number > 65535) return 3463;
-  return number;
-}
-const server = app.listen(port, () => {
+const host = hostDeEscuta(process.env.HOST);
+const server = app.listen(port, host, () => {
   const address = server.address();
   const actual = typeof address === "object" && address ? address.port : port;
-  console.log(`[gateway] listening port=${actual}`);
+  console.log(`[gateway] listening port=${actual} host=${host}`);
 });

@@ -45,6 +45,14 @@ jobs:
       - name: Run Tests
         run: npm test
 
+  container-health:
+    name: Container /health
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sobe a imagem e confere /health
+        run: bash scripts/container-health.sh
+
   build:
     name: Build
     runs-on: ubuntu-latest
