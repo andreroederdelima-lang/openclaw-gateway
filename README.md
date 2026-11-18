@@ -19,16 +19,10 @@ Todos os endpoints requerem `Authorization: Bearer <supabase_jwt>`.
 
 ## Deploy
 
-PM2 na VPS (`PORT` ou 3463). O proxy do app encaminha `/api/v1/*` para esse processo. O host do proxy fica na configuração do ambiente.
+O passo a passo copiável está em `docs/DEPLOY.md`. Há Dockerfile com healthcheck, unidade systemd e PM2. A porta sai de `PORT`. O proxy do app encaminha só `/api/v1/*`. Domínio e segredo ficam fora do git.
 
 Receita, atestado e pedido de exames exigem `medico.nome` e `medico.crm` no corpo. Não há profissional padrão.
 
 ## Env
 
-```
-PORT=3463
-OPENAI_API_KEY=...        # provedor principal
-ANTHROPIC_API_KEY=...     # só se o OpenAI não responder
-LLM_MOCK=1                # só em teste local, sem chave e sem rede
-SUPABASE_JWT_SECRET=      # opcional — sem ele, JWT é decodificado sem verificação (dev)
-```
+A lista fechada, sem valores, está em `.env.example`. Em produção `LLM_MOCK` fica vazio. Com `NODE_ENV=production` e `LLM_MOCK=1` o processo não sobe.

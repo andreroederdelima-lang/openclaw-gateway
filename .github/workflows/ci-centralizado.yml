@@ -38,6 +38,14 @@ jobs:
       run-codeql: false
       codeql-language: 'javascript-typescript'
 
+  container-health:
+    name: Container /health
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sobe a imagem e confere /health
+        run: bash scripts/container-health.sh
+
   # Gate prod: roda E2E (Playwright) e smoke test só quando promovendo pra main
   e2e:
     if: github.base_ref == 'main' && github.event_name == 'pull_request'
