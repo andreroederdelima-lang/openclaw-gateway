@@ -5,12 +5,16 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test/*.test.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^3.3.2"
+  },
+  "overrides": {
+    "qs": "6.17.1"
   }
 }
