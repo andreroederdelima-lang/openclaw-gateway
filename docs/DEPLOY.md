@@ -68,7 +68,11 @@ A CI deste repositório sobe essa imagem sem chave e espera o healthcheck ficar 
 
 ### 2.b systemd
 
+O clone novo não traz `node_modules`. Instale o lock de produção antes de entregar o diretório ao usuário do serviço. Sem isso o processo cai com `ERR_MODULE_NOT_FOUND` e o systemd fica reiniciando.
+
 ```bash
+cd "$REPO_DIR"
+npm ci --omit=dev
 sudo useradd --system --home "$REPO_DIR" --shell /usr/sbin/nologin openclaw || true
 sudo chown -R openclaw:openclaw "$REPO_DIR"
 sudo cp "$REPO_DIR/deploy/openclaw-gateway.service" /etc/systemd/system/openclaw-gateway.service

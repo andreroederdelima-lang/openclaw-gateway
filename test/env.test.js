@@ -39,3 +39,12 @@ test("produção recusa mock e o exemplo não traz valor", () => {
   assert.equal(exemplo.includes("http"), false);
   assert.equal(exemplo.includes("@"), false);
 });
+
+test("o systemd do runbook instala o lock antes de subir", () => {
+  const doc = readFileSync(new URL("../docs/DEPLOY.md", import.meta.url), "utf8");
+  const bloco = doc.split("### 2.b systemd")[1].split("### 2.c")[0];
+  const instalar = bloco.indexOf("npm ci --omit=dev");
+  const subir = bloco.indexOf("systemctl enable");
+  assert.ok(instalar >= 0);
+  assert.ok(subir > instalar);
+});
