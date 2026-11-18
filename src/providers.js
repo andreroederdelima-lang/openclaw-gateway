@@ -19,13 +19,13 @@ export function textoMock(messages) {
 /**
  * @returns {Promise<{ provider: "openai" | "anthropic", mode: "live" | "mock", text: string } | null>}
  */
-export async function completarTexto({ env, fetchImpl, log, system, messages }) {
+export async function completarTexto({ env, fetchImpl, log, system, messages, textoLocal }) {
   const logger = log ?? { info() {}, error() {} };
   for (const provider of ordemProvedores(env)) {
     try {
       if (provider === "openai" && env.LLM_MOCK === "1") {
         logger.info("[provider] openai mode=mock");
-        return { provider: "openai", mode: "mock", text: textoMock(messages) };
+        return { provider: "openai", mode: "mock", text: textoLocal ? textoLocal(messages) : textoMock(messages) };
       }
       const text = provider === "openai"
         ? await chamarOpenAI({ env, fetchImpl, system, messages })
@@ -85,7 +85,39 @@ async function chamarAnthropic({ env, fetchImpl, system, messages }) {
   return text;
 }
 
+export async function transcreverImagens({ env, fetchImpl, log, images }) {
+  const logger = log ?? { info() {}, error() {} };
+  if (env.LLM_MOCK === "1" || !env.OPENAI_API_KEY) return null;
+  try {
+    const text = await chamarOpenAI({
+      env,
+      fetchImpl,
+      system: "Transcreva somente o texto visível nas imagens, em português. Não complete trechos ilegíveis e não invente paciente, diagnóstico ou conduta. Se não houver texto legível, responda apenas: Não foi possível ler a imagem.",
+      messages: [{
+        role: "user",
+        content: [
+          { type: "text", text: "Transcreva as anotações destas imagens." },
+          ...images.map((img) => ({
+            type: "image_url",
+            image_url: { url: `data:${img.mediaType};base64,${img.data}` },
+          })),
+        ],
+      }],
+    });
+    logger.info("[provider] openai");
+    return { provider: "openai", mode: "live", text: text.trim() };
+  } catch (e) {
+    logger.error(`[openai] ${e.message}`);
+    return null;
+  }
+}
+
 export const PROVEDOR_INDISPONIVEL = {
   error: "provedor_indisponivel",
   message: "O serviço de IA não respondeu. Nada foi gerado.",
+};
+
+export const VISAO_INDISPONIVEL = {
+  error: "visao_indisponivel",
+  message: "A leitura da imagem precisa do provedor de IA. Nada foi transcrito.",
 };
