@@ -16,6 +16,7 @@ permissions:
   contents: read
   security-events: write
   pull-requests: read
+  actions: read
 
 jobs:
   ci:
@@ -32,6 +33,9 @@ jobs:
     with:
       # PR pra main = audit mais agressivo (low). PR pra staging/dev = high.
       audit-level: ${{ github.base_ref == 'main' && 'low' || 'high' }}
+      # run-codeql=true derruba o workflow inteiro no startup quando o CodeQL
+      # não está habilitado. Audit e gitleaks continuam.
+      run-codeql: false
       codeql-language: 'javascript-typescript'
 
   # Gate prod: roda E2E (Playwright) e smoke test só quando promovendo pra main
