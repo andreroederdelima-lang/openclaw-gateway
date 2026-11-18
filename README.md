@@ -12,7 +12,10 @@ Todos os endpoints requerem `Authorization: Bearer <supabase_jwt>`.
 - `POST /api/v1/documents/atestado` — gera atestado
 - `POST /api/v1/documents/pedido-exames` — gera pedido de exames
 - `POST /api/v1/documents/sign-intent` — instruções para assinatura Bird ID ICP-Brasil
-- `POST /api/v1/sbar/format` — formata passagem de caso SBAR
+- `POST /api/v1/sbar/format` — formata passagem de caso SBAR já separada
+- `POST /api/v1/prontuario/generate` — estrutura uma nota em prontuário
+- `POST /api/v1/sbar/photo` — transcreve fotos de anotação
+- `POST /api/v1/sbar/organize` — organiza uma transcrição em SBAR
 
 ## Deploy
 

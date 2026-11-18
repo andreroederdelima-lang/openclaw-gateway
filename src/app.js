@@ -3,14 +3,16 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import fetch from "node-fetch";
 import { medicoEnviado } from "./medico.js";
-import { completarTexto, PROVEDOR_INDISPONIVEL } from "./providers.js";
+import { completarTexto, PROVEDOR_INDISPONIVEL, transcreverImagens, VISAO_INDISPONIVEL } from "./providers.js";
 import { textoAtestado, textoPedidoExames, textoReceita } from "./documents.js";
+import { prontuarioDeNota, prontuarioDoModelo } from "./prontuario.js";
+import { imagensValidas, sbarDeTranscricao, sbarDoModelo } from "./sbar.js";
 
 export function createApp({ env = process.env, fetchImpl = fetch, log } = {}) {
   const logger = log ?? { info: console.log, error: console.error };
   const app = express();
   app.use(cors({ origin: true }));
-  app.use(express.json({ limit: "10mb" }));
+  app.use(express.json({ limit: "20mb" }));
 
   const hoje = () => new Date().toLocaleDateString("pt-BR");
 
@@ -91,6 +93,68 @@ export function createApp({ env = process.env, fetchImpl = fetch, log } = {}) {
       hoje: hoje(),
     });
     res.json({ document, kind: "pedido-exames" });
+  });
+
+  app.post("/api/v1/prontuario/generate", requireAuth, async (req, res) => {
+    const { texto, paciente = {} } = req.body ?? {};
+    if (typeof texto !== "string" || !texto.trim()) {
+      return res.status(400).json({ error: "nota_obrigatoria", message: "Envie a nota ou a transcrição da consulta." });
+    }
+    const nota = texto.trim();
+    const data = hoje();
+    const system = "Estruture a nota clínica em JSON com as chaves queixaPrincipal, historia, exameFisico, hipoteses, conduta e cid. Use somente o que está na nota. Se um campo não aparecer, use exatamente \"Não informado na nota.\". Não invente paciente, diagnóstico, exame ou conduta. Responda apenas o JSON.";
+    const result = await completarTexto({
+      env,
+      fetchImpl,
+      log: logger,
+      system,
+      messages: [{ role: "user", content: nota }],
+      textoLocal: () => JSON.stringify(prontuarioDeNota(nota, paciente, data)),
+    });
+    if (!result) return res.status(503).json(PROVEDOR_INDISPONIVEL);
+    try {
+      const doc = prontuarioDoModelo(result.text, paciente, data);
+      return res.json({ ...doc, provider: result.provider, mode: result.mode });
+    } catch {
+      return res.status(502).json({
+        error: "resposta_invalida",
+        message: "O serviço de IA devolveu um texto que não deu para organizar. Nada foi preenchido.",
+      });
+    }
+  });
+
+  app.post("/api/v1/sbar/photo", requireAuth, async (req, res) => {
+    const imagens = imagensValidas(req.body?.images);
+    if (!imagens.ok) return res.status(imagens.status).json(imagens.body);
+    const result = await transcreverImagens({ env, fetchImpl, log: logger, images: imagens.images });
+    if (!result?.text) return res.status(503).json(VISAO_INDISPONIVEL);
+    return res.json({ transcript: result.text, provider: result.provider, mode: result.mode });
+  });
+
+  app.post("/api/v1/sbar/organize", requireAuth, async (req, res) => {
+    const transcript = typeof req.body?.transcript === "string" ? req.body.transcript.trim() : "";
+    if (!transcript) {
+      return res.status(400).json({ error: "transcricao_obrigatoria", message: "Envie a transcrição antes de organizar a passagem." });
+    }
+    const system = "Organize a transcrição em JSON com as chaves situation, background, assessment e recommendation. Use somente o que está na transcrição. Se um campo não aparecer, use exatamente \"Não identificado na transcrição.\". Não invente paciente, diagnóstico ou conduta. Responda apenas o JSON.";
+    const result = await completarTexto({
+      env,
+      fetchImpl,
+      log: logger,
+      system,
+      messages: [{ role: "user", content: transcript }],
+      textoLocal: () => JSON.stringify(sbarDeTranscricao(transcript)),
+    });
+    if (!result) return res.status(503).json(PROVEDOR_INDISPONIVEL);
+    try {
+      const sbar = sbarDoModelo(result.text, transcript);
+      return res.json({ ...sbar, provider: result.provider, mode: result.mode });
+    } catch {
+      return res.status(502).json({
+        error: "resposta_invalida",
+        message: "O serviço de IA devolveu um texto que não deu para organizar. Nada foi preenchido.",
+      });
+    }
   });
 
   app.post("/api/v1/sbar/format", requireAuth, (req, res) => {
