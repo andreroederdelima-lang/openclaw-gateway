@@ -1,0 +1,52 @@
+---
+description: Autonomia do executor no Cursor — seguir sem parar, ambiente cloud, login de dev, produção
+alwaysApply: true
+---
+# Autonomia do executor (Cursor)
+
+Esta regra vale só para o Cursor. Onde ela conflitar com o CLAUDE.md do projeto, ela prevalece, exceto nas regras de segurança, dados reais e segredos, que continuam valendo integralmente.
+
+## 1. Onde você está
+Antes de agir, detecte o ambiente. Se existe /agent/repos ou /workspace, você é Cloud Agent (Linux). Nesse caso:
+- O cérebro é /agent/repos/cerebro, não ~/cerebro. Se não estiver montado, grave pendências e registro de pedidos em docs/pendencias-andre.md do próprio repo.
+- Não use open, ~/bin/cockpit nem nada em ~/.claude/. Esses caminhos só existem no Mac.
+- Evidência visual é screenshot do Playwright mais a rota, não URL aberta no navegador.
+No Mac, valem os caminhos ~/ originais.
+
+## 2. O padrão é seguir
+Sem instrução explícita de modo, o modo é "siga". Não pergunte "item a item, fase inteira ou siga?". Informe fase e próximo item em uma linha e comece.
+Ao concluir um item, registre no ROADMAP e continue. Não pare entre itens.
+
+## 3. Bloqueio não é parada
+Item que depende do André (decisão, chave, item [!], auditoria pendente, OK de merge): faça tudo o que não depende dele, abra o PR, registre a pendência numerada com o que falta em uma frase e a opção que você recomenda, e passe para o próximo item executável do mesmo projeto, até a fase 8. Só pare quando não houver nenhum item executável nesse intervalo.
+Fases 9 a 14 (cobrança, piloto, white label, comercial, marketing, suporte) só com pedido explícito do André.
+Documento, rascunho ou scaffold não fecha item cujo critério pede algo funcionando. Se só dá para entregar o documento, registre como pendência e não marque o item.
+Item cujo critério contradiz o CLAUDE.md do projeto: marque "- [ ] (não se aplica: <motivo>)", registre a pendência e siga.
+
+## 4. Paradas reais (as únicas)
+- Comando destrutivo em banco de produção sem backup feito na mesma sessão.
+- Dinheiro, cobrança real ou mensagem enviada a cliente real.
+- Trocar segredo de produção.
+Merge liberado com a CI verde, sem pedir OK do André por PR. Exceções que exigem OK explícito do André: PR com migração de banco, e PR que altera cobrança, pagamento ou envio de mensagem a cliente. Na plataforma.comissao.vital, além da CI verde, exigir revisão do Codex sem findings antes do merge.
+
+## 5. Ambiente local sem pedir nada
+- Falta .env: gere a partir do .env.example com valores de desenvolvimento (segredo aleatório, banco local). Nunca aponte para banco, projeto ou domínio de produção.
+- Falta banco: suba o banco local do projeto, rode migrations e seed.
+- Integração externa sem chave: deixe vazia e use o caminho desligado ou simulado. Não pare por isso.
+Nunca peça ao André valor de variável de desenvolvimento.
+
+## 6. Login de desenvolvimento
+Todo projeto com tela tem um seed idempotente que cria um usuário fictício por papel, com e-mail <papel>@example.com e senha de desenvolvimento documentada no próprio seed. Se o projeto não tem esse seed, ou o seed cria usuário que não consegue entrar, consertar isso é o primeiro item.
+Use esses logins para testar. Nunca peça login ao André. Nunca use e-mail real nem senha que exista fora do ambiente local.
+
+## 7. Pronto = visto
+Mudança em tela termina com teste Playwright que entra com o usuário de seed, percorre o fluxo e salva screenshot. Se o projeto não tem Playwright, instale como dependência de desenvolvimento.
+Relate: rota, o que aparece na tela e o caminho do screenshot. Código que compila não é evidência.
+
+## 8. Produção
+No Mac (worker mac-andre) você tem SSH e opera a VPS: backup antes de qualquer migração ou deploy, sempre. Na nuvem você não tem acesso à VPS: registre a pendência e siga.
+
+## 9. Como pedir decisão ao André
+Pergunta não é parada. Continue executando tudo o que não depende dele enquanto a pergunta fica aberta.
+Quando um item depender dele, faça a pergunta no chat com no máximo 3 opções numeradas, sua recomendação e o risco em uma linha, e siga para o próximo item executável sem esperar a resposta. Ele responde só com o número, quando puder. Ao receber a resposta, execute e continue.
+Mantenha no máximo 3 perguntas abertas por vez; as demais ficam na fila de pendências. Não mande relatório para ele ler: relatório longo vai para arquivo, no chat entra só a pergunta.
